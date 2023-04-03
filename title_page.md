@@ -1,4 +1,5 @@
 The Rust Programming Language
+
 by Steve Klabnik and Carol Nichols, with contributions from the Rust Community
 
 This version of the text assumes you’re using Rust 1.67.1 (released 2023-02-09) or later. See the “Installation” section of Chapter 1 to install or update Rust.
