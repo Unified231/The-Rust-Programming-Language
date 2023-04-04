@@ -14,28 +14,15 @@ Look at the generated Cargo.toml file:
 
 Filename: Cargo.toml
 
-[package]
-name = "guessing_game"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+{{#include ../listings/ch02-guessing-game-tutorial/no-listing-01-cargo-new/Cargo.toml}}
 As you saw in Chapter 1, cargo new generates a “Hello, world!” program for you. Check out the src/main.rs file:
 
 Filename: src/main.rs
 
-fn main() {
-    println!("Hello, world!");
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/no-listing-01-cargo-new/src/main.rs}}
 Now let’s compile this “Hello, world!” program and run it in the same step using the cargo run command:
 
-$ cargo run
-   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
-    Finished dev [unoptimized + debuginfo] target(s) in 1.50s
-     Running `target/debug/guessing_game`
-Hello, world!
+{{#include ../listings/ch02-guessing-game-tutorial/no-listing-01-cargo-new/output.txt}}
 The run command comes in handy when you need to rapidly iterate on a project, as we’ll do in this game, quickly testing each iteration before moving on to the next one.
 
 Reopen the src/main.rs file. You’ll be writing all the code in this file.
@@ -45,46 +32,30 @@ The first part of the guessing game program will ask for user input, process tha
 
 Filename: src/main.rs
 
-use std::io;
-
-fn main() {
-    println!("Guess the number!");
-
-    println!("Please input your guess.");
-
-    let mut guess = String::new();
-
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    println!("You guessed: {guess}");
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:all}}
 Listing 2-1: Code that gets a guess from the user and prints it
 
 This code contains a lot of information, so let’s go over it line by line. To obtain user input and then print the result as output, we need to bring the io input/output library into scope. The io library comes from the standard library, known as std:
 
-use std::io;
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:io}}
 By default, Rust has a set of items defined in the standard library that it brings into the scope of every program. This set is called the prelude, and you can see everything in it in the standard library documentation.
 
 If a type you want to use isn’t in the prelude, you have to bring that type into scope explicitly with a use statement. Using the std::io library provides you with a number of useful features, including the ability to accept user input.
 
 As you saw in Chapter 1, the main function is the entry point into the program:
 
-fn main() {
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:main}}
 The fn syntax declares a new function; the parentheses, (), indicate there are no parameters; and the curly bracket, {, starts the body of the function.
 
 As you also learned in Chapter 1, println! is a macro that prints a string to the screen:
 
-    println!("Guess the number!");
-
-    println!("Please input your guess.");
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:print}}
 This code is printing a prompt stating what the game is and requesting input from the user.
 
 Storing Values with Variables
 Next, we’ll create a variable to store the user input, like this:
 
-    let mut guess = String::new();
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:string}}
 Now the program is getting interesting! There’s a lot going on in this little line. We use the let statement to create the variable. Here’s another example:
 
 let apples = 5;
@@ -103,8 +74,7 @@ In full, the let mut guess = String::new(); line has created a mutable variable 
 Receiving User Input
 Recall that we included the input/output functionality from the standard library with use std::io; on the first line of the program. Now we’ll call the stdin function from the io module, which will allow us to handle user input:
 
-    io::stdin()
-        .read_line(&mut guess)
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:read}}
 If we hadn’t imported the io library with use std::io; at the beginning of the program, we could still use the function by writing this function call as std::io::stdin. The stdin function returns an instance of std::io::Stdin, which is a type that represents a handle to the standard input for your terminal.
 
 Next, the line .read_line(&mut guess) calls the read_line method on the standard input handle to get input from the user. We’re also passing &mut guess as the argument to read_line to tell it what string to store the user input in. The full job of read_line is to take whatever the user types into standard input and append that into a string (without overwriting its contents), so we therefore pass that string as an argument. The string argument needs to be mutable so the method can change the string’s content.
@@ -115,7 +85,7 @@ The & indicates that this argument is a reference, which gives you a way to let 
 Handling Potential Failure with Result
 We’re still working on this line of code. We’re now discussing a third line of text, but note that it’s still part of a single logical line of code. The next part is this method:
 
-        .expect("Failed to read line");
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:expect}}
 We could have written this code as:
 
 io::stdin().read_line(&mut guess).expect("Failed to read line");
@@ -131,19 +101,7 @@ Values of the Result type, like values of any type, have methods defined on them
 
 If you don’t call expect, the program will compile, but you’ll get a warning:
 
-$ cargo build
-   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
-warning: unused `Result` that must be used
-  --> src/main.rs:10:5
-   |
-10 |     io::stdin().read_line(&mut guess);
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: `#[warn(unused_must_use)]` on by default
-   = note: this `Result` may be an `Err` variant, which should be handled
-
-warning: `guessing_game` (bin "guessing_game") generated 1 warning
-    Finished dev [unoptimized + debuginfo] target(s) in 0.59s
+{{#include ../listings/ch02-guessing-game-tutorial/no-listing-02-without-expect/output.txt}}
 Rust warns that you haven’t used the Result value returned from read_line, indicating that the program hasn’t handled a possible error.
 
 The right way to suppress the warning is to actually write error-handling code, but in our case we just want to crash this program when a problem occurs, so we can use expect. You’ll learn about recovering from errors in Chapter 9.
@@ -151,7 +109,7 @@ The right way to suppress the warning is to actually write error-handling code, 
 Printing Values with println! Placeholders
 Aside from the closing curly bracket, there’s only one more line to discuss in the code so far:
 
-    println!("You guessed: {guess}");
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-01/src/main.rs:print_guess}}
 This line prints the string that now contains the user’s input. The {} set of curly brackets is a placeholder: think of {} as little crab pincers that hold a value in place. When printing the value of a variable, the variable name can go inside the curly brackets. When printing the result of evaluating an expression, place empty curly brackets in the format string, then follow the format string with a comma-separated list of expressions to print in each empty curly bracket placeholder in the same order. Printing a variable and the result of an expression in one call to println! would look like this:
 
 let x = 5;
@@ -183,8 +141,7 @@ Cargo’s coordination of external crates is where Cargo really shines. Before w
 
 Filename: Cargo.toml
 
-[dependencies]
-rand = "0.8.5"
+{{#include ../listings/ch02-guessing-game-tutorial/listing-02-02/Cargo.toml:8:}}
 In the Cargo.toml file, everything that follows a header is part of that section that continues until another section starts. In [dependencies] you tell Cargo which external crates your project depends on and which versions of those crates you require. In this case, we specify the rand crate with the semantic version specifier 0.8.5. Cargo understands Semantic Versioning (sometimes called SemVer), which is a standard for writing version numbers. The specifier 0.8.5 is actually shorthand for ^0.8.5, which means any version that is at least 0.8.5 but below 0.9.0.
 
 Cargo considers these versions to have public APIs compatible with version 0.8.5, and this specification ensures you’ll get the latest patch release that will still compile with the code in this chapter. Any version 0.9.0 or greater is not guaranteed to have the same API as what the following examples use.
@@ -250,26 +207,7 @@ Let’s start using rand to generate a number to guess. The next step is to upda
 
 Filename: src/main.rs
 
-use std::io;
-use rand::Rng;
-
-fn main() {
-    println!("Guess the number!");
-
-    let secret_number = rand::thread_rng().gen_range(1..=100);
-
-    println!("The secret number is: {secret_number}");
-
-    println!("Please input your guess.");
-
-    let mut guess = String::new();
-
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    println!("You guessed: {guess}");
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-03/src/main.rs:all}}
 Listing 2-3: Adding code to generate a random number
 
 First we add the line use rand::Rng;. The Rng trait defines methods that random number generators implement, and this trait must be in scope for us to use those methods. Chapter 10 will cover traits in detail.
@@ -307,22 +245,7 @@ Now that we have user input and a random number, we can compare them. That step 
 
 Filename: src/main.rs
 
-This code does not compile!
-use rand::Rng;
-use std::cmp::Ordering;
-use std::io;
-
-fn main() {
-    // --snip--
-
-    println!("You guessed: {guess}");
-
-    match guess.cmp(&secret_number) {
-        Ordering::Less => println!("Too small!"),
-        Ordering::Greater => println!("Too big!"),
-        Ordering::Equal => println!("You win!"),
-    }
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-04/src/main.rs:here}}
 Listing 2-4: Handling the possible return values of comparing two numbers
 
 First we add another use statement, bringing a type called std::cmp::Ordering into scope from the standard library. The Ordering type is another enum and has the variants Less, Greater, and Equal. These are the three outcomes that are possible when you compare two values.
@@ -337,52 +260,14 @@ When the code compares 50 to 38, the cmp method will return Ordering::Greater be
 
 However, the code in Listing 2-4 won’t compile yet. Let’s try it:
 
-$ cargo build
-   Compiling libc v0.2.86
-   Compiling getrandom v0.2.2
-   Compiling cfg-if v1.0.0
-   Compiling ppv-lite86 v0.2.10
-   Compiling rand_core v0.6.2
-   Compiling rand_chacha v0.3.0
-   Compiling rand v0.8.5
-   Compiling guessing_game v0.1.0 (file:///projects/guessing_game)
-error[E0308]: mismatched types
-  --> src/main.rs:22:21
-   |
-22 |     match guess.cmp(&secret_number) {
-   |                 --- ^^^^^^^^^^^^^^ expected struct `String`, found integer
-   |                 |
-   |                 arguments to this function are incorrect
-   |
-   = note: expected reference `&String`
-              found reference `&{integer}`
-note: associated function defined here
-
-For more information about this error, try `rustc --explain E0308`.
-error: could not compile `guessing_game` due to previous error
+{{#include ../listings/ch02-guessing-game-tutorial/listing-02-04/output.txt}}
 The core of the error states that there are mismatched types. Rust has a strong, static type system. However, it also has type inference. When we wrote let mut guess = String::new(), Rust was able to infer that guess should be a String and didn’t make us write the type. The secret_number, on the other hand, is a number type. A few of Rust’s number types can have a value between 1 and 100: i32, a 32-bit number; u32, an unsigned 32-bit number; i64, a 64-bit number; as well as others. Unless otherwise specified, Rust defaults to an i32, which is the type of secret_number unless you add type information elsewhere that would cause Rust to infer a different numerical type. The reason for the error is that Rust cannot compare a string and a number type.
 
 Ultimately, we want to convert the String the program reads as input into a real number type so we can compare it numerically to the secret number. We do so by adding this line to the main function body:
 
 Filename: src/main.rs
 
-    // --snip--
-
-    let mut guess = String::new();
-
-    io::stdin()
-        .read_line(&mut guess)
-        .expect("Failed to read line");
-
-    let guess: u32 = guess.trim().parse().expect("Please type a number!");
-
-    println!("You guessed: {guess}");
-
-    match guess.cmp(&secret_number) {
-        Ordering::Less => println!("Too small!"),
-        Ordering::Greater => println!("Too big!"),
-        Ordering::Equal => println!("You win!"),
-    }
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/no-listing-03-convert-string-to-number/src/main.rs:here}}
 The line is:
 
 let guess: u32 = guess.trim().parse().expect("Please type a number!");
@@ -417,22 +302,7 @@ The loop keyword creates an infinite loop. We’ll add a loop to give users more
 
 Filename: src/main.rs
 
-    // --snip--
-
-    println!("The secret number is: {secret_number}");
-
-    loop {
-        println!("Please input your guess.");
-
-        // --snip--
-
-        match guess.cmp(&secret_number) {
-            Ordering::Less => println!("Too small!"),
-            Ordering::Greater => println!("Too big!"),
-            Ordering::Equal => println!("You win!"),
-        }
-    }
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/no-listing-04-looping/src/main.rs:here}}
 As you can see, we’ve moved everything from the guess input prompt onward into a loop. Be sure to indent the lines inside the loop another four spaces each and run the program again. The program will now ask for another guess forever, which actually introduces a new problem. It doesn’t seem like the user can quit!
 
 The user could always interrupt the program by using the keyboard shortcut ctrl-c. But there’s another way to escape this insatiable monster, as mentioned in the parse discussion in “Comparing the Guess to the Secret Number”: if the user enters a non-number answer, the program will crash. We can take advantage of that to allow the user to quit, as shown here:
@@ -466,18 +336,7 @@ Let’s program the game to quit when the user wins by adding a break statement:
 
 Filename: src/main.rs
 
-        // --snip--
-
-        match guess.cmp(&secret_number) {
-            Ordering::Less => println!("Too small!"),
-            Ordering::Greater => println!("Too big!"),
-            Ordering::Equal => {
-                println!("You win!");
-                break;
-            }
-        }
-    }
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/no-listing-05-quitting/src/main.rs:here}}
 Adding the break line after You win! makes the program exit the loop when the user guesses the secret number correctly. Exiting the loop also means exiting the program, because the loop is the last part of main.
 
 Handling Invalid Input
@@ -485,20 +344,7 @@ To further refine the game’s behavior, rather than crashing the program when t
 
 Filename: src/main.rs
 
-        // --snip--
-
-        io::stdin()
-            .read_line(&mut guess)
-            .expect("Failed to read line");
-
-        let guess: u32 = match guess.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-
-        println!("You guessed: {guess}");
-
-        // --snip--
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-05/src/main.rs:here}}
 Listing 2-5: Ignoring a non-number guess and asking for another guess instead of crashing the program
 
 We switch from an expect call to a match expression to move from crashing on an error to handling the error. Remember that parse returns a Result type and Result is an enum that has the variants Ok and Err. We’re using a match expression here, as we did with the Ordering result of the cmp method.
@@ -533,41 +379,7 @@ Awesome! With one tiny final tweak, we will finish the guessing game. Recall tha
 
 Filename: src/main.rs
 
-use rand::Rng;
-use std::cmp::Ordering;
-use std::io;
-
-fn main() {
-    println!("Guess the number!");
-
-    let secret_number = rand::thread_rng().gen_range(1..=100);
-
-    loop {
-        println!("Please input your guess.");
-
-        let mut guess = String::new();
-
-        io::stdin()
-            .read_line(&mut guess)
-            .expect("Failed to read line");
-
-        let guess: u32 = match guess.trim().parse() {
-            Ok(num) => num,
-            Err(_) => continue,
-        };
-
-        println!("You guessed: {guess}");
-
-        match guess.cmp(&secret_number) {
-            Ordering::Less => println!("Too small!"),
-            Ordering::Greater => println!("Too big!"),
-            Ordering::Equal => {
-                println!("You win!");
-                break;
-            }
-        }
-    }
-}
+{{#rustdoc_include ../listings/ch02-guessing-game-tutorial/listing-02-06/src/main.rs}}
 Listing 2-6: Complete guessing game code
 
 At this point, you’ve successfully built the guessing game. Congratulations!
